@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
     const description = await page.$eval('div.d1isfkwk', el => el.textContent?.trim() || '');
 
     // Extrae el precio
-    //const price = await page.$eval('span[data-testid="book-it-price"]', el => el.textContent?.trim() || '');
+    //const price = await page.$eval('div._1jo4hgw', el => el.textContent?.trim() || '');
 
     
     // Extrae las URLs de las fotos que contienen 'im/pictures/miso/Hosting-'

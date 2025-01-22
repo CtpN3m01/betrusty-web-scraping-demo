@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
+import { Carousel } from 'flowbite-react';
 
 interface ScrapeResult {
   title: string;
   description: string | null;
-  headings: string[];
+  photos: string[];
 }
 
 export default function Home() {
@@ -37,49 +38,43 @@ export default function Home() {
   };
 
   return (
-    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-      <h1>BeTrusty - Web Scraper</h1>
-      <input
-        type="text"
-        placeholder="Enter URL"
-        value={url}
-        onChange={(e) => setUrl(e.target.value)}
-        style={{
-          width: '100%',
-          padding: '10px',
-          margin: '10px 0',
-          borderRadius: '4px',
-          border: '1px solid #ccc',
-          color: 'black',
-        }}
-      />
-      <button
-        onClick={fetchData}
-        style={{
-          backgroundColor: '#0070f3',
-          color: '#fff',
-          padding: '10px 20px',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-        }}
-      >
-        Fetch Info
-      </button>
+    <div className="p-5 max-w-4xl mx-auto">
+      <h1 className="text-2xl font-bold mb-4">BeTrusty - Web Scraper</h1>
+      <div className="flex mb-4">
+        <input
+          type="text"
+          placeholder="Enter URL"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          className="flex-grow p-2 border border-gray-300 rounded-l-md"
+          style={{ color: 'black' }}
+        />
+        <button
+          onClick={fetchData}
+          className="bg-blue-500 text-white p-2 rounded-r-md"
+        >
+          Fetch Info
+        </button>
+      </div>
 
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p className="text-red-500">{error}</p>}
 
       {result && (
-        <div style={{ marginTop: '20px', padding: '10px', border: '1px solid #ccc' }}>
-          <h2>Results:</h2>
-          <p><strong>Title:</strong> {result.title}</p>
-          <p><strong>Description:</strong> {result.description}</p>
-          <h3>Headings:</h3>
-          <ul>
-            {result.headings.map((heading, index) => (
-              <li key={index}>{heading}</li>
-            ))}
-          </ul>
+        <div className="mt-6">
+          <h2 className="text-xl font-semibold mb-2">{result.title}</h2>
+          <p className="mb-4">{result.description}</p>
+          {result.photos.length > 0 && (
+            <Carousel>
+              {result.photos.map((photo, index) => (
+                <img
+                  key={index}
+                  src={photo}
+                  alt={`Slide ${index + 1}`}
+                  className="w-full h-64 object-cover"
+                />
+              ))}
+            </Carousel>
+          )}
         </div>
       )}
     </div>
