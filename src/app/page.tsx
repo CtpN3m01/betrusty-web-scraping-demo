@@ -38,7 +38,7 @@ export default function Home() {
 
   return (
     <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-      <h1>Web Scraper Demo</h1>
+      <h1>BeTrusty - Web Scraper</h1>
       <input
         type="text"
         placeholder="Enter URL"

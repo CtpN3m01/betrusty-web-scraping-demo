@@ -8,10 +8,19 @@ interface ScrapeResponse {
   headings: string[];
 }
 
+const isValidUrl = (str: string): boolean => {
+  try {
+    new URL(str);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
 export async function POST(req: Request): Promise<Response> {
   const { url }: { url: string } = await req.json();
 
-  if (!url || !url.startsWith('http')) {
+  if (!url || !isValidUrl(url)) {
     return NextResponse.json(
       { error: 'Invalid URL' },
       { status: 400 }
@@ -19,7 +28,7 @@ export async function POST(req: Request): Promise<Response> {
   }
 
   try {
-    const { data } = await axios.get(url);
+    const { data } = await axios.get(url, { timeout: 5000 });
     const $ = cheerio.load(data);
 
     const title = $('title').text();
@@ -31,10 +40,12 @@ export async function POST(req: Request): Promise<Response> {
     const response: ScrapeResponse = { title, description, headings };
 
     return NextResponse.json(response);
-  } catch (error) {
+  } catch (error: any) {
+    const statusCode = error.response?.status || 500;
+    const message = error.response?.statusText || 'Unknown error';
     return NextResponse.json(
-      { error: 'Failed to fetch the URL' },
-      { status: 500 }
+      { error: `Failed to fetch the URL: ${message}` },
+      { status: statusCode }
     );
   }
 }
