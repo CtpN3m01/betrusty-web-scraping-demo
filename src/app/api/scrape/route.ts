@@ -1,51 +1,40 @@
-import axios from 'axios';
-import * as cheerio from 'cheerio';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import puppeteer from 'puppeteer';
 
-interface ScrapeResponse {
-  title: string;
-  description: string | null;
-  headings: string[];
-}
-
-const isValidUrl = (str: string): boolean => {
+export async function POST(req: NextRequest) {
   try {
-    new URL(str);
-    return true;
-  } catch {
-    return false;
-  }
-};
+    const { url } = await req.json();
 
-export async function POST(req: Request): Promise<Response> {
-  const { url }: { url: string } = await req.json();
+    if (!url) {
+      return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+    }
 
-  if (!url || !isValidUrl(url)) {
-    return NextResponse.json(
-      { error: 'Invalid URL' },
-      { status: 400 }
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+    await page.goto(url, { waitUntil: 'networkidle2' });
+
+    // Extrae el título
+    const title = await page.title();
+
+    // Extrae la descripción completa
+    const description = await page.$eval('div.d1isfkwk', el => el.textContent?.trim() || '');
+
+    // Extrae el precio
+    //const price = await page.$eval('span[data-testid="book-it-price"]', el => el.textContent?.trim() || '');
+
+    
+    // Extrae las URLs de las fotos que contienen 'im/pictures/miso/Hosting-'
+    const photos = await page.$$eval('img', imgs =>
+        imgs
+        .map(img => img.src)
+        .filter(src => src.includes('im/pictures/miso/Hosting-'))
     );
-  }
 
-  try {
-    const { data } = await axios.get(url, { timeout: 5000 });
-    const $ = cheerio.load(data);
+    await browser.close();
 
-    const title = $('title').text();
-    const description = $('meta[name="description"]').attr('content') || null;
-    const headings = $('h1, h2, h3')
-      .map((_, el) => $(el).text().trim())
-      .get();
-
-    const response: ScrapeResponse = { title, description, headings };
-
-    return NextResponse.json(response);
-  } catch (error: any) {
-    const statusCode = error.response?.status || 500;
-    const message = error.response?.statusText || 'Unknown error';
-    return NextResponse.json(
-      { error: `Failed to fetch the URL: ${message}` },
-      { status: statusCode }
-    );
+    return NextResponse.json({ title, description, photos });
+  } catch (error) {
+    console.error('Error during scraping:', error);
+    return NextResponse.json({ error: 'Failed to scrape the URL' }, { status: 500 });
   }
 }
