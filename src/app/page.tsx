@@ -90,7 +90,7 @@ export default function Home() {
           <h2 className="text-xl font-semibold mb-2">{result.title}</h2>
           <p className="mb-2">{result.description}</p>
           <p className="mb-4">Price: {result.price}</p>
-          {result.photos.length > 0 && (
+          {result.photos.length > 0 ? (
             <div className="h-64">
               <Carousel autoPlay infiniteLoop showThumbs={false} showStatus={false} interval={3000}>
                 {result.photos.map((photo) => (
@@ -113,7 +113,8 @@ export default function Home() {
               </button>
             </div>
             </div>
-          )}
+          )
+          : (<p>No photos found</p>)}
         </div>
       )}
     </div>

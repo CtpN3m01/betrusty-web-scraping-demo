@@ -18,8 +18,8 @@ export async function POST(req: NextRequest) {
     const title = await page.title();
 
     // Extrae la descripción completa
-    const description = await page.$eval('div.d1isfkwk', el => el.textContent?.trim() || '');
-
+    //const description = await page.$eval('div.d1isfkwk', el => el.textContent?.trim() || '');
+    const description = ""
     // Extrae el precio
     //const price = await page.$eval('div._1jo4hgw', el => el.textContent?.trim() || '');
     const price = ""
