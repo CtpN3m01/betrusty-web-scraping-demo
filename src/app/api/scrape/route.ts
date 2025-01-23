@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const photos = await page.$$eval('img', imgs =>
         imgs
         .map(img => img.src)
-        .filter(src => src.includes('im/pictures/hosting'))
+        .filter(src => src.includes('im/pictures/'))
     );
 
     await browser.close();
