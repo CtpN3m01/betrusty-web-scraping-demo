@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 import { saveAs } from 'file-saver';
+import Image from 'next/image';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 interface ScrapeResult {
   title: string;
@@ -16,10 +18,12 @@ export default function Home() {
   const [url, setUrl] = useState<string>('');
   const [result, setResult] = useState<ScrapeResult | null>(null);
   const [error, setError] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const fetchData = async () => {
     setError('');
     setResult(null);
+    setIsLoading(true);
 
     try {
       const response = await fetch('/api/scrape', {
@@ -37,6 +41,8 @@ export default function Home() {
       setResult(data);
     } catch (err: any) {
       setError(err.message || 'An error occurred');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -71,6 +77,8 @@ export default function Home() {
         </button>
       </div>
 
+      {isLoading && <LoadingSpinner />}
+
       {error && <p className="text-red-500">{error}</p>}
 
       {result && (
@@ -81,11 +89,13 @@ export default function Home() {
           {result.photos.length > 0 && (
             <div className="h-64">
               <Carousel autoPlay infiniteLoop showThumbs={false} showStatus={false} interval={3000}>
-                {result.photos.map((photo, index) => (
-                  <img
-                    key={index}
+                {result.photos.map((photo) => (
+                  <Image
+                    key={photo} // Usamos la URL de la foto como key
                     src={photo}
-                    alt={`Slide ${index + 1}`}
+                    alt={`Slide ${photo}`}
+                    width={720} 
+                    height={480} 
                     className="w-full h-full object-cover"
                   />
                 ))}
