@@ -39,8 +39,12 @@ export default function Home() {
 
       const data: ScrapeResult = await response.json();
       setResult(data);
-    } catch (err: any) {
-      setError(err.message || 'An error occurred');
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        setError(error.message || 'An error occurred');
+      } else {
+        setError('An unexpected error occurred');
+      }
     } finally {
       setIsLoading(false);
     }
