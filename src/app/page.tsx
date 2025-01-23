@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
+import { saveAs } from 'file-saver';
 
 interface ScrapeResult {
   title: string;
@@ -38,6 +39,18 @@ export default function Home() {
       setError(err.message || 'An error occurred');
     }
   };
+
+  const downloadImages = () => {
+    if (result?.photos) {
+      const sanitizedTitle = result.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+      result.photos.forEach((photoUrl, index) => {
+        const fileExtension = photoUrl.split('.').pop()?.split('?')[0] || 'jpg';
+        const fileName = `${sanitizedTitle}_image${index + 1}.${fileExtension}`;
+        saveAs(photoUrl, fileName);
+      });
+    }
+  };
+
   return (
     <div className="p-5 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">BeTrusty - Web Scraper</h1>
@@ -77,6 +90,14 @@ export default function Home() {
                   />
                 ))}
               </Carousel>
+              <div className="flex justify-center mt-2">
+              <button
+                onClick={downloadImages}
+                className="bg-blue-500 text-white p-2 rounded-md"
+              >
+                Download Images
+              </button>
+            </div>
             </div>
           )}
         </div>
