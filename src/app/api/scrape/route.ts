@@ -11,6 +11,7 @@ export async function POST(req: NextRequest) {
 
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
+
     await page.goto(url, { waitUntil: 'networkidle2' });
 
     // Extrae el título
@@ -20,9 +21,8 @@ export async function POST(req: NextRequest) {
     const description = await page.$eval('div.d1isfkwk', el => el.textContent?.trim() || '');
 
     // Extrae el precio
-    //const price = await page.$eval('div._1jo4hgw', el => el.textContent?.trim() || '');
+    const price = await page.$eval('div._1jo4hgw', el => el.textContent?.trim() || '');
 
-    
     // Extrae las URLs de las fotos que contienen 'im/pictures/miso/Hosting-'
     const photos = await page.$$eval('img', imgs =>
         imgs
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     await browser.close();
 
-    return NextResponse.json({ title, description, photos });
+    return NextResponse.json({ title, description, price, photos });
   } catch (error) {
     console.error('Error during scraping:', error);
     return NextResponse.json({ error: 'Failed to scrape the URL' }, { status: 500 });

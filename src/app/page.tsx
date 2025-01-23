@@ -1,12 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { Carousel } from 'flowbite-react';
+import { Carousel } from 'react-responsive-carousel';
+import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
 interface ScrapeResult {
   title: string;
   description: string | null;
   photos: string[];
+  price: string;
 }
 
 export default function Home() {
@@ -36,7 +38,6 @@ export default function Home() {
       setError(err.message || 'An error occurred');
     }
   };
-
   return (
     <div className="p-5 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-4">BeTrusty - Web Scraper</h1>
@@ -62,18 +63,21 @@ export default function Home() {
       {result && (
         <div className="mt-6">
           <h2 className="text-xl font-semibold mb-2">{result.title}</h2>
-          <p className="mb-4">{result.description}</p>
+          <p className="mb-2">{result.description}</p>
+          <p className="mb-4">Price: {result.price}</p>
           {result.photos.length > 0 && (
-            <Carousel>
-              {result.photos.map((photo, index) => (
-                <img
-                  key={index}
-                  src={photo}
-                  alt={`Slide ${index + 1}`}
-                  className="w-full h-64 object-cover"
-                />
-              ))}
-            </Carousel>
+            <div className="h-64">
+              <Carousel autoPlay infiniteLoop showThumbs={false} showStatus={false} interval={3000}>
+                {result.photos.map((photo, index) => (
+                  <img
+                    key={index}
+                    src={photo}
+                    alt={`Slide ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                ))}
+              </Carousel>
+            </div>
           )}
         </div>
       )}
