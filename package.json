@@ -11,6 +11,9 @@
   "dependencies": {
     "@headlessui/react": "^2.2.0",
     "@heroicons/react": "^2.2.0",
+    "@playwright/test": "^1.50.0",
+    "@sparticuz/chromium": "^109.0.5",
+    "@sparticuz/chromium-min": "^131.0.1",
     "axios": "^1.7.9",
     "cheerio": "^1.0.0",
     "embla-carousel-react": "^8.5.2",

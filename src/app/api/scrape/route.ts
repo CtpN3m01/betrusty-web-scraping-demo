@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import puppeteer from 'puppeteer';
+import { firefox } from '@playwright/test';
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,12 +9,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
-    const browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    });
+    const browser = await firefox.launch({ headless: true });
     const page = await browser.newPage();
 
-    await page.goto(url, { waitUntil: 'networkidle2' });
+    await page.goto(url, { waitUntil: 'networkidle' });
 
     // Extrae el título
     const title = await page.title();
