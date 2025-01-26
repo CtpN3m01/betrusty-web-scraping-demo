@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { firefox } from '@playwright/test';
+import puppeteer from "puppeteer-core";
+
+const BROWSER_WS = "wss://brd-customer-hl_ee6a4cf1-zone-scraping_browser1:fg6v46yp0max@brd.superproxy.io:9222"
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,10 +11,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 });
     }
 
-    const browser = await firefox.launch({ headless: true });
+    const browser = await puppeteer.connect({
+      browserWSEndpoint: BROWSER_WS,
+    });
+
     const page = await browser.newPage();
 
-    await page.goto(url, { waitUntil: 'networkidle' });
+    await page.goto(url, { waitUntil: 'networkidle2' });
 
     // Extrae el título
     const title = await page.title();
