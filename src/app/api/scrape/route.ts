@@ -1,40 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { chromium } from 'playwright';
+import { chromium } from 'playwright-core';
+
+export const config = {
+  runtime: 'edge', // Usa el runtime Edge para mejor compatibilidad
+  regions: ['iad1'], // Región recomendada para serverless con binaries pesados
+};
 
 export async function POST(req: NextRequest) {
+  let browser;
   try {
     const { url } = await req.json();
 
-    if (!url) {
-      return NextResponse.json({ error: 'URL is required' }, { status: 400 });
+    if (!url || !isValidUrl(url)) {
+      return NextResponse.json({ error: 'URL inválida' }, { status: 400 });
     }
 
-    // Inicia Playwright con Chromium
-    const browser = await chromium.launch();
+    // Configuración para Vercel
+    browser = await chromium.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'], // Necesario para entornos serverless
+      executablePath: process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH, // Path del Chromium en Vercel
+    });
+
     const page = await browser.newPage();
-
-    // Navega a la página y espera a que se cargue todo el contenido dinámico
+    
+    // Configura timeout y espera a eventos específicos
     await page.goto(url);
+    
+    // Espera a elementos dinámicos antes de extraer datos
+    await page.waitForSelector('div.d1isfkwk', { timeout: 5000 });
+    
+    // Extracción de datos optimizada
+    const [title, description, price, photos] = await Promise.all([
+      page.title(),
+      page.$eval('div.d1isfkwk', el => el.textContent?.trim() || ''),
+      'No disponible',
+      page.$$eval('img', imgs => 
+        imgs.map(img => img.src).filter(src => src.includes('im/pictures/'))
+      )
+    ]);
 
-    // Extrae el título
-    const title = await page.title();
+    return NextResponse.json({ 
+      title, 
+      description, 
+      price: price.replace(/\D/g, ''), // Ejemplo: limpia formato de precio
+      photos: photos.slice(0, 10) // Limita a 5 imágenes
+    });
 
-    // Extrae la descripción (ajusta el selector según el HTML generado)
-    const description = await page.$eval('div.d1isfkwk', el => el.textContent?.trim() || '');
-    //const description = "description";
-    // Extrae el precio (ajusta el selector según el HTML generado)
-    //const price = await page.$eval('span[data-testid="price"]', el => el.textContent?.trim() || 'No price available');
-    const price = "price";
-    // Extrae las imágenes
-    const photos = await page.$$eval('img', imgs =>
-      imgs.map(img => img.src).filter(src => src.includes('im/pictures/hosting'))
+  } catch (error: unknown) {
+    console.error('Error:', error);
+    return NextResponse.json(
+      { error: 'Error al procesar la solicitud', details: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 500 }
     );
+  } finally {
+    if (browser) await browser.close(); // Cierra el navegador en cualquier caso
+  }
+}
 
-    await browser.close();
-
-    return NextResponse.json({ title, description, price, photos });
-  } catch (error: any) {
-    console.error('Error during scraping:', error.message);
-    return NextResponse.json({ error: 'Failed to scrape the URL', details: error.message }, { status: 500 });
+// Validación básica de URL
+function isValidUrl(url: string) {
+  try {
+    new URL(url);
+    return true;
+  } catch {
+    return false;
   }
 }

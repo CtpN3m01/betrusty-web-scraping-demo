@@ -1,7 +1,7 @@
+// next.config.js
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   images: {
     remotePatterns: [
       {
@@ -12,6 +12,18 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Configuración para Playwright en Vercel
+  experimental: {
+    serverComponentsExternalPackages: ['playwright-core'],
+  },
+  webpack: (config) => {
+    // Añadir configuración necesaria para Playwright
+    config.externals.push({ playwright: 'commonjs playwright' });
+    
+    // Si tienes otras configuraciones webpack, mantenlas aquí
+    
+    return config;
+  }
 };
 
 export default nextConfig;
